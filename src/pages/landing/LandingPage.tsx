@@ -1,11 +1,11 @@
-import { Services } from '../components/landing/Services'
-import { Booking } from '../components/landing/Booking'
 import { ArrowRight, Star    } from "lucide-react"
-import { Gallery } from '../components/landing/Gallery'
+import { Services } from '../../components/landing/Services'
+import { Booking } from '../../components/landing/Booking'
+import { Gallery } from '../../components/landing/Gallery'
 
 
 
-export default function LandingPage() {
+export function LandingPage() {
 
   return (
     <div >
@@ -42,11 +42,6 @@ export default function LandingPage() {
               Reservar Turno
               <ArrowRight className="ml-2 w-5 h-5" />
             </a>
-            {/* <button
-              className="font-semibold text-base sm:text-lg px-6 py-4 h-auto border-2 border-primary/50 text-foreground hover:bg-primary/10 bg-transparent"
-            >
-              Ver Galería
-            </button> */}
           </div>
 
           <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-8 border-t border-border/50 max-w-xl mx-auto">
@@ -67,25 +62,6 @@ export default function LandingPage() {
       </div>
     </section>
 
-      {/* <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {services.map((s) => (
-          <ServiceCard key={s.id} service={s} />
-        ))}
-      </section> */}
-
-      {/* <section>
-        <h2 className="text-xl font-semibold mb-2">Galería</h2>
-        <Gallery images={sampleImages} />
-      </section> */}
-
-      {/* <div className="text-center">
-        <Link
-          to="/book"
-          className="px-4 py-2 bg-blue-600 text-white rounded shadow"
-        >
-          Reservar ahora
-        </Link>
-      </div> */}
     <Services />
     <Gallery />
     <Booking />

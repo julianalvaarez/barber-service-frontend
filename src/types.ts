@@ -6,15 +6,6 @@ deposit?: number
 duration?: number
 }
 
-
-export type User = {
-id: string
-name?: string
-phone?: string
-email?: string
-}
-
-
 export type Booking = {
 id: string
 service_id: string
@@ -33,7 +24,7 @@ export type ServicesBarber = {
 }
 
 export type ResApi = {
-    data: { newPreferenceId: string, payment: PendingAny },
+    data: { newPreferenceId: string },
 }
 
 export type TimeBooking = {
@@ -66,4 +57,17 @@ export interface Barber {
   photo?: string | null;
   active: boolean;
   created_at?: string;
+}
+
+export interface OpenBooking {
+ date: string, 
+ time: string, 
+ barber_id: string
+
+}
+
+export interface Slot {
+  hour: string;
+  availability: boolean;
+  bookInfo?: Appointment | null;
 }

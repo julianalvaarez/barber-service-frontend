@@ -4,11 +4,11 @@ import { supabase } from "../../lib/supabaseClient";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components//ui/card";
 import { Input } from "../../components//ui/input";
 import { Button } from "../../components/ui/button";
-import type { PendingAny } from "../../types";
+import type { Service } from "../../types";
 import axios from "axios";
 
 export function ConfigPage() {
-  const [services, setServices] = useState<PendingAny[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function ConfigPage() {
     setServices(data || []);
   }
 
-  async function updateService(id:string, updates:PendingAny){
+  async function updateService(id:string, updates:{ price?: number, duration?: number, deposit?: number }){
     setLoading(true);
     try {
       await axios.put(`http://localhost:4000/api/admin/services/${id}`, updates);
@@ -59,16 +59,16 @@ export function ConfigPage() {
                             <div className="flex gap-5 flex-col md:flex-row ">
                               <div className="flex gap-5 flex-col md:flex-row">
                                 <div className="flex gap-1 items-center">
-                                  <Input defaultValue={s.price} type="number" id="price" onBlur={(e: PendingAny)=>updateService(s.id, { price: Number(e.target.value) })} className="w-28" />
+                                  <Input defaultValue={s.price} type="number" id="price" onBlur={(e)=>updateService(s.id, { price: Number(e.target.value) })} className="w-28" />
                                   <label htmlFor="price" className="text-xs font-semibold">$</label>
                                 </div>
                                 <div className="flex gap-1 md:border-x md:border-border md:px-4 items-center">
-                                  <Input defaultValue={s.duration} type="number" id="minutes" onBlur={(e: PendingAny)=>updateService(s.id, { duration: Number(e.target.value) - 1 })}   className="w-28" />
+                                  <Input defaultValue={s.duration} type="number" id="minutes" onBlur={(e)=>updateService(s.id, { duration: Number(e.target.value) - 1 })}   className="w-28" />
                                   <label htmlFor="minutes" className="text-xs">min</label>
                                 </div>
                               </div>
                               <div>
-                                <Input defaultValue={s.deposit} type="number" id="deposit" onBlur={(e: PendingAny)=>updateService(s.id, { duration: Number(e.target.value) })} className="w-28" />
+                                <Input defaultValue={s.deposit} type="number" id="deposit" onBlur={(e)=>updateService(s.id, { deposit: Number(e.target.value) })} className="w-28" />
                                 <label htmlFor="deposit" className="text-xs font-semibold">$ Seña</label>
                               </div>
                             </div>

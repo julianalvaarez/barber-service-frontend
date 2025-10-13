@@ -5,22 +5,22 @@ import { Input } from "../../components//ui/input";
 import { Button } from "../../components//ui/button";
 import { supabase } from "../../lib/supabaseClient";
 import { Select, SelectTrigger, SelectContent, SelectItem } from "../../components//ui/select";
-import type { PendingAny } from "../../types";
+import type { Appointment, Barber, Service } from "../../types";
 import axios from "axios";
 
-export function BookingDialog({ booking, onClose, barbers }: { booking:PendingAny, onClose: ()=>void, barbers:PendingAny[] }) {
+export function BookingDialog({ booking, onClose, barbers }: { booking:Partial<Appointment>, onClose: ()=>void, barbers:Barber[] }) {
   const isNew = !booking.id;
   const [user, setUser] = useState({ name: booking?.client || "", phone: booking?.client_phone || ""});
-  const [services, setServices] = useState<PendingAny[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState<string>(booking.service_id || "");
   const [barberId, setBarberId] = useState<string>(booking.barber_id || booking.barber_id || "");
 
   useEffect(()=> {
     (async ()=>{
-      const sb = await axios.get("http://localhost:4000/api/admin/barbers"); 
-      const sv = await supabase.from("services").select("*"); setServices((sv.data || []));
-      if (!serviceId && sv.data && sv.data[0]) setServiceId(sv.data[0].id);
-      if (!barberId && barbers && barbers[0]) setBarberId(sb.data[0].id);
+      const {data: barbersData} = await axios.get("http://localhost:4000/api/admin/barbers"); 
+      const {data: servicesData} = await supabase.from("services").select("*"); setServices((servicesData || []));
+      if (!serviceId && servicesData && servicesData[0]) setServiceId(servicesData[0].id);
+      if (!barberId && barbers && barbers[0]) setBarberId(barbersData[0].id);
     })()
   }, []);
 
@@ -64,7 +64,7 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:PendingAn
   }
 
   return (
-    <Dialog open onOpenChange={(open: PendingAny)=>{ if(!open) onClose(); }}>
+    <Dialog open onOpenChange={(open: boolean)=>{ if(!open) onClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isNew ? "Agregar turno" : "Detalle del turno"}</DialogTitle>
@@ -78,7 +78,7 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:PendingAn
 
             <div >
               <label className="text-xs">Peluquero</label>
-              <Select onValueChange={(v: PendingAny)=>setBarberId(v)} value={barberId}  >
+              <Select onValueChange={(v: string)=>setBarberId(v)} value={barberId}  >
                 <SelectTrigger>{barbers.find(b=>b.id===barberId)?.name ?? "Elegir peluquero"}</SelectTrigger>
                 <SelectContent>
                   {barbers.map(b=> <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
@@ -97,8 +97,8 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:PendingAn
             </div>
 
           <div className="grid grid-cols-1 gap-2">
-            <Input placeholder="Nombre" value={user.name} onChange={(e: PendingAny)=>setUser({...user, name:e.target.value})} />
-            <Input placeholder="Teléfono" value={user.phone} onChange={(e: PendingAny)=>setUser({...user, phone:e.target.value})} />
+            <Input placeholder="Nombre" value={user.name} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setUser({...user, name:e.target.value})} />
+            <Input placeholder="Teléfono" value={user.phone} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setUser({...user, phone:e.target.value})} />
           </div>
         </div>
 

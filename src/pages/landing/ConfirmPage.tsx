@@ -1,7 +1,7 @@
 import { CircleCheckBig } from "lucide-react";
 
 
-export default function ConfirmPage() {
+export function ConfirmPage() {
   const booking = JSON.parse(localStorage.getItem("bookingData") || "{}");
 
   return (

@@ -1,6 +1,6 @@
 import { Calendar, Clock, User, Phone } from "lucide-react"
 import { useEffect, useState } from "react"
-import type { Barber, PendingAny, Service, TimeBooking } from "../../types"
+import type { Appointment, Barber, Service, TimeBooking } from "../../types"
 import { supabase } from "../../lib/supabaseClient"
 import { useNavigate } from "react-router-dom"
 import { generateTimes } from "../../utils/generateTimes"
@@ -37,7 +37,7 @@ export const Booking = () => {
 
  const getAvailableTimes = async () => {
     const {data: books} = await axios.get(`http://localhost:4000/api/admin/bookings`)
-    const bookingsToday = books?.filter((book: PendingAny) => book.bookDate === formData.date)
+    const bookingsToday = books?.filter((book: Appointment) => book.date === formData.date)
     const intervals = 45
     const blocked = blockReservatedBooks(generateTimes("10:00", "20:00", intervals), bookingsToday, intervals)
     setAvailableTimes(blocked)
@@ -224,7 +224,7 @@ export const Booking = () => {
                     </select>
                   </div>
                   <div>
-                    <Select onValueChange={(v: PendingAny)=>{setSelectedBarber(v)}} value={selectedBarber}>
+                    <Select onValueChange={(v)=>{setSelectedBarber(v)}} value={selectedBarber}>
                       <SelectTrigger className="min-w-[180px]">
                       {barbers.find(b => b.id === selectedBarber)?.name ?? "Todos los peluqueros"}
                       </SelectTrigger>

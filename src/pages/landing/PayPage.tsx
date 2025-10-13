@@ -1,12 +1,11 @@
-import type { ResApi } from '../types'
+import type { ResApi } from '../../types'
 import { useEffect, useState } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import axios from 'axios'
 
-export default function PayPage() {
+export function PayPage() {
   // const location = useLocation()
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
-  // const state: PendingAny = location.state || {}
   const [loading, setLoading] = useState(false)
   const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}')
   const { name, phone, service, date, time, deposit, serviceName, barberName } = bookingData

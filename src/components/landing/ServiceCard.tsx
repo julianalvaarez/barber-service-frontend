@@ -2,7 +2,7 @@ import type { Service } from '../../types';
 import { Link } from 'react-router-dom'
 
 
-export default function ServiceCard({ service }: { service: Service }) {
+export function ServiceCard({ service }: { service: Service }) {
 return (
     <article className="border rounded-md p-4 bg-white">
         <h3 className="text-lg font-semibold">{service.name}</h3>

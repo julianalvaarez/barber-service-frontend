@@ -1,17 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
-
-// Páginas usuario
-import LandingPage from '../pages/LandingPage'
-import PayPage from '../pages/PayPage'
-import ConfirmPage from '../pages/ConfirmPage'
-import {NotFound} from '../pages/NotFound'
-
-// Páginas admin
-import Dashboard from '../pages/admin/Dashboard'
-import { UserLayouts } from '@/layouts/UserLayouts'
-import { AdminLayouts } from '@/layouts/AdminLayouts'
-import { ConfigPage } from '@/pages/admin/ConfigPage'
-import { MonthlyBalance } from '@/pages/admin/MonthlyBalance'
+import { LandingPage, PayPage, ConfirmPage, NotFound } from '../pages/landing'
+import {ConfigPage, Dashboard, MonthlyBalance} from '../pages/admin'
+import { UserLayouts, AdminLayouts } from '../layouts'
 
 export function RouterApp() {
   return (
