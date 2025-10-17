@@ -1,27 +1,19 @@
-// src/pages/admin/BookingDialog.tsx
 import{ useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components//ui/dialog";
-import { Input } from "../../components//ui/input";
-import { Button } from "../../components//ui/button";
-import { supabase } from "../../lib/supabaseClient";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "../../components//ui/select";
-import type { Appointment, Barber, Service } from "../../types";
 import axios from "axios";
+import type { Appointment } from "../../types";
+import { useBarberContext } from "@/context/BarberContextProvider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input, Button, Select, SelectTrigger, SelectContent, SelectItem } from "../../components/ui";
 
-export function BookingDialog({ booking, onClose, barbers, onSave }: { booking:Partial<Appointment>, onClose: ()=>void, barbers:Barber[], onSave: ()=>void }) {
+export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Appointment>, onClose: ()=>void, onSave: ()=>void }) {
+  const {services, barbers} = useBarberContext()
   const isNew = !booking.id;
   const [user, setUser] = useState({ name: booking?.client || "", phone: booking?.client_phone || ""});
-  const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState<string>(booking.service_id || "");
   const [barberId, setBarberId] = useState<string>(booking.barber_id || booking.barber_id || "");
 
   useEffect(()=> {
-    (async ()=>{
-      const {data: barbersData} = await axios.get("http://localhost:4000/api/services/barbers");
-      const {data: servicesData} = await supabase.from("services").select("*"); setServices((servicesData || []));
-      if (!serviceId && servicesData && servicesData[0]) setServiceId(servicesData[0].id);
-      if (!barberId && barbers && barbers[0]) setBarberId(barbersData[0].id);
-    })()
+    if (!serviceId && services && services[0]) setServiceId(services[0].id);
+    if (!barberId && barbers && barbers[0]) setBarberId(barbers[0].id);
   }, []);
 
   async function createManual(){
@@ -36,14 +28,14 @@ export function BookingDialog({ booking, onClose, barbers, onSave }: { booking:P
         status: "paid",
       });
       onSave();
-    } catch (err){ console.error(err); }
+    } catch (err){ alert("Error creando turno"); console.error(err); }
   }
 
   async function cancelBooking(){
     try {
       await axios.delete(`http://localhost:4000/api/admin/bookings/${booking.id}`);
       onClose();
-    } catch (err){ console.error(err); }
+    } catch (err){ alert("Error cancelando turno"); console.error(err); }
   }
 
   async function updateBooking() {
@@ -58,9 +50,7 @@ export function BookingDialog({ booking, onClose, barbers, onSave }: { booking:P
           status: "paid",
         })
         onSave();
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); alert("Error actualizando el turno"); }
   }
 
   return (

@@ -127,7 +127,7 @@ export function Agenda() {
           </div>
         </CardContent>
 
-        {openBooking && <BookingDialog booking={openBooking} onClose={() => { setOpenBooking(null) }} onSave={() => { setOpenBooking(null); loadBookings(); }} barbers={barbers} />}
+        {openBooking && <BookingDialog booking={openBooking} onClose={() => { setOpenBooking(null) }} onSave={() => { setOpenBooking(null); loadBookings(); }} />}
         </Card>
       
       }

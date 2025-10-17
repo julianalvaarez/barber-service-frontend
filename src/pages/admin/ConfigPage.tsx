@@ -1,31 +1,20 @@
 // src/pages/admin/SettingsServices.tsx
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components//ui/card";
 import { Input } from "../../components//ui/input";
 import { Button } from "../../components/ui/button";
-import type { Service } from "../../types";
 import axios from "axios";
+import { useBarberContext } from "@/context/BarberContextProvider";
 
 export function ConfigPage() {
-  const [services, setServices] = useState<Service[]>([]);
+  const {services, loadServices} = useBarberContext();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    load();
-  }, [])
-  
-
-  async function load(){
-    const { data } = await supabase.from("services").select("*").order("name");
-    setServices(data || []);
-  }
 
   async function updateService(id:string, updates:{ price?: number, duration?: number, deposit?: number }){
     setLoading(true);
     try {
       await axios.put(`http://localhost:4000/api/services/${id}`, updates);
-      await load();
+      await loadServices();
     } finally { setLoading(false); }
   }
 
@@ -33,7 +22,7 @@ export function ConfigPage() {
       const ok = confirm("¿Seguro que deseas eliminar este servicio?");
       if (!ok) return;
       await axios.put(`http://localhost:4000/api/services/${id}`);
-      await load();
+      await loadServices();
   }
 
   return (
