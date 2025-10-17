@@ -24,7 +24,7 @@ export function ConfigPage() {
   async function updateService(id:string, updates:{ price?: number, duration?: number, deposit?: number }){
     setLoading(true);
     try {
-      await axios.put(`http://localhost:4000/api/admin/services/${id}`, updates);
+      await axios.put(`http://localhost:4000/api/services/${id}`, updates);
       await load();
     } finally { setLoading(false); }
   }
@@ -32,7 +32,7 @@ export function ConfigPage() {
   async function deleteService(id:string){
       const ok = confirm("¿Seguro que deseas eliminar este servicio?");
       if (!ok) return;
-      await axios.put(`http://localhost:4000/api/admin/services/${id}`);
+      await axios.put(`http://localhost:4000/api/services/${id}`);
       await load();
   }
 

@@ -8,7 +8,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem } from "../../componen
 import type { Appointment, Barber, Service } from "../../types";
 import axios from "axios";
 
-export function BookingDialog({ booking, onClose, barbers }: { booking:Partial<Appointment>, onClose: ()=>void, barbers:Barber[] }) {
+export function BookingDialog({ booking, onClose, barbers, onSave }: { booking:Partial<Appointment>, onClose: ()=>void, barbers:Barber[], onSave: ()=>void }) {
   const isNew = !booking.id;
   const [user, setUser] = useState({ name: booking?.client || "", phone: booking?.client_phone || ""});
   const [services, setServices] = useState<Service[]>([]);
@@ -17,7 +17,7 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:Partial<A
 
   useEffect(()=> {
     (async ()=>{
-      const {data: barbersData} = await axios.get("http://localhost:4000/api/admin/barbers"); 
+      const {data: barbersData} = await axios.get("http://localhost:4000/api/services/barbers");
       const {data: servicesData} = await supabase.from("services").select("*"); setServices((servicesData || []));
       if (!serviceId && servicesData && servicesData[0]) setServiceId(servicesData[0].id);
       if (!barberId && barbers && barbers[0]) setBarberId(barbersData[0].id);
@@ -35,7 +35,7 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:Partial<A
         barber_id: barberId,
         status: "paid",
       });
-      onClose();
+      onSave();
     } catch (err){ console.error(err); }
   }
 
@@ -57,7 +57,7 @@ export function BookingDialog({ booking, onClose, barbers }: { booking:Partial<A
           barber_id: barberId,
           status: "paid",
         })
-        onClose();
+        onSave();
     } catch (error) {
       console.error(error);
     }

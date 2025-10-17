@@ -8,18 +8,18 @@ export function PayPage() {
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}')
-  const { name, phone, service, date, time, deposit, serviceName, barberName } = bookingData
+  const { name, phone, date, time, deposit, serviceId, barberId, serviceName, barberName } = bookingData
 
   const createPreference = async () => {
     setLoading(true)
     try {
         const {data: {newPreferenceId}}: ResApi = await axios.post('http://localhost:4000/api/bookings', {
-        service_id: service,
+        service_id: serviceId,
         date,
         time,
         clientTel: Number(phone),
         clientName: name,
-        barberName: barberName || "No especificado"
+        barberId: barberId || "No especificado"
     })
     setPreferenceId(newPreferenceId)
     // Opcional: navegar a confirm page local mostrando datos (no fiable si usuario refresca)
@@ -30,8 +30,7 @@ export function PayPage() {
   }
 
   useEffect(() => {
-    initMercadoPago('APP_USR-82304fa9-b779-465e-9778-05d8207a2fa7', { locale: 'es-AR' });
-    console.log(date, time, service);  
+    initMercadoPago('APP_USR-82304fa9-b779-465e-9778-05d8207a2fa7');
   }, [])
   
 

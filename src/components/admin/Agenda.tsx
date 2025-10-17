@@ -5,56 +5,38 @@ import { Card, CardHeader, CardTitle, CardContent } from "../../components//ui/c
 import { Select, SelectTrigger, SelectContent, SelectItem } from "../../components/ui/select";
 import {BookingDialog} from "../../components/admin/BookingDialog";
 import { generateTimes } from "../../utils/generateTimes";
-import type { Appointment, Barber, Slot } from "../../types";
+import type { Appointment, Slot } from "../../types";
 import axios from "axios";
 import { blockReservatedBooks } from "@/utils/blockReservatedBooks";
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
+import { useBarberContext } from "@/context/BarberContextProvider";
 
 export function Agenda() {
+  const {bookings, loading, loadBookings, barbers, loadBarbers} = useBarberContext();
   const [date, setDate] = useState<Date>(new Date());
-  const [barbers, setBarbers] = useState<Barber[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<string>("");
-  const [slotList, setSlotList] = useState<Slot[]  >(() => generateTimes("10:00", "20:00", 30).map(t => ({ hour: t, availability: true })));
+  const [slotList, setSlotList] = useState<Slot[]  >(() => generateTimes("10:00", "20:00", 45).map(t => ({ hour: t, availability: true })));
   const [openBooking, setOpenBooking] = useState<Partial<Appointment> | null >(null);
-  const [loading, setLoading] = useState(false)
-  const [bookings, setBookings] = useState<Appointment[] >([])
+
 
   useEffect(() => {
-    loadBarbers();
+    getBarbers();
   }, []);
 
   useEffect(() => {
     getBookingsForDay();
   }, [date, bookings, selectedBarber]);
 
-  async function loadBarbers() {
-    setLoading(true);
-    try {
-      const { data } = await axios.get("http://localhost:4000/api/admin/barbers");
-      setBarbers(data || []);
-      if (data && data[0]) setSelectedBarber(data[0].id);
-      loadBookings()
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  async function getBarbers() {
+    loadBarbers()
+    if (barbers && barbers[0]) setSelectedBarber(barbers[0].id);
+    loadBookings()
   }
 
-  async function loadBookings() {
-    setLoading(true);
-    try {
-      const { data } = await axios.get('http://localhost:4000/api/admin/bookings');
-      setBookings(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
+
 
   function getBookingsForDay() {
       if (!selectedBarber || bookings.length === 0) return;      
@@ -145,7 +127,7 @@ export function Agenda() {
           </div>
         </CardContent>
 
-        {openBooking && <BookingDialog booking={openBooking} onClose={() => { setOpenBooking(null); loadBookings(); }} barbers={barbers} />}
+        {openBooking && <BookingDialog booking={openBooking} onClose={() => { setOpenBooking(null) }} onSave={() => { setOpenBooking(null); loadBookings(); }} barbers={barbers} />}
         </Card>
       
       }
