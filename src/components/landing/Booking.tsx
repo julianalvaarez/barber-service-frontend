@@ -50,6 +50,7 @@ export const Booking = () => {
           return { ...r, ...patched };
         } catch (err) {
           console.log(err);
+          return r
         }
       }));
       setList(updated );

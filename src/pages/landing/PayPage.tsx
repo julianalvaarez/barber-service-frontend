@@ -1,10 +1,10 @@
-import type { ResApi } from '../../types'
+import type { PendingAny, ResApi } from '../../types'
 import { useEffect, useState } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import axios from 'axios'
 
 export function PayPage() {
-  const [preferenceId, setPreferenceId] = useState<{ newPreferenceId: string} | null>(null)
+  const [preferenceId, setPreferenceId] = useState<PendingAny  >(null)
   const [loading, setLoading] = useState(false)
   const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}')
   const { name, phone, date, time, deposit, serviceId, barberId, serviceName, barberName } = bookingData
@@ -55,7 +55,7 @@ export function PayPage() {
       </button>
       {preferenceId && (
           <div>
-              <Wallet initialization={{ preferenceId: preferenceId }} />
+              <Wallet initialization={{ preferenceId }} />
           </div>
       )}
 
