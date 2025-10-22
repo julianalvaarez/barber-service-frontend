@@ -4,16 +4,16 @@ import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import axios from 'axios'
 
 export function PayPage() {
-  // const location = useLocation()
-  const [preferenceId, setPreferenceId] = useState<string | null>(null)
+  const [preferenceId, setPreferenceId] = useState<{ newPreferenceId: string} | null>(null)
   const [loading, setLoading] = useState(false)
   const bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}')
   const { name, phone, date, time, deposit, serviceId, barberId, serviceName, barberName } = bookingData
 
+
   const createPreference = async () => {
     setLoading(true)
     try {
-        const {data: {newPreferenceId}}: ResApi = await axios.post('http://localhost:4000/api/bookings', {
+        const {data}: ResApi = await axios.post('http://localhost:4000/api/bookings', {
         service_id: serviceId,
         date,
         time,
@@ -21,9 +21,7 @@ export function PayPage() {
         clientName: name,
         barberId: barberId || "No especificado"
     })
-    setPreferenceId(newPreferenceId)
-    // Opcional: navegar a confirm page local mostrando datos (no fiable si usuario refresca)
-    // nav('/confirm', { state: { name, phone, email, serviceId, date, time } })
+    setPreferenceId(data)
     } catch (err) {
     console.error(err)
     } finally { setLoading(false) }
@@ -60,6 +58,7 @@ export function PayPage() {
               <Wallet initialization={{ preferenceId: preferenceId }} />
           </div>
       )}
+
       </div>
     </section>
   )
