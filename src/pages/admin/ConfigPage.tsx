@@ -13,7 +13,7 @@ export function ConfigPage() {
   async function updateService(id:string, updates:{ price?: number, duration?: number, deposit?: number }){
     setLoading(true);
     try {
-      await axios.put(`http://localhost:4000/api/services/${id}`, updates);
+      await axios.put(`https://barber-service-backend.onrender.com/api/services/${id}`, updates);
       await loadServices();
     } finally { setLoading(false); }
   }
@@ -21,7 +21,7 @@ export function ConfigPage() {
   async function deleteService(id:string){
       const ok = confirm("¿Seguro que deseas eliminar este servicio?");
       if (!ok) return;
-      await axios.put(`http://localhost:4000/api/services/${id}`);
+      await axios.put(`https://barber-service-backend.onrender.com/api/services/${id}`);
       await loadServices();
   }
 

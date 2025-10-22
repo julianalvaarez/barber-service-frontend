@@ -2,34 +2,69 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { User, Phone } from "lucide-react"
-import { Button, Label, Calendar, Select, SelectContent, SelectItem, SelectTrigger, Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "../ui"
-import type { Appointment, Barber, PendingAny, Service } from "../../types"
+import type { Appointment, Barber, BookingLocal, PendingAny, Service } from "../../types"
 import { computeStartableSlots } from "../../utils/computeStartableSlots"
 import { generateTimes } from "@/utils/generateTimes"
 import type { SlotEx } from "@/utils/computeStartableSlots"
 import { blockReservatedBooks } from "../../utils/blockReservatedBooks"
 import { BookingInfo } from "./BookingInfo"
 import { useBarberContext } from "@/context/BarberContextProvider"
+import { SheetBookings } from "./SheetBookings"
+import { getLocalReservations, removeLocalReservation, updateLocalReservation } from "@/utils/localReservations"
+import axios from "axios"
 
 export const Booking = () => {
   const nav = useNavigate()
-  const [modalOpen, setModalOpen] = useState(false)
-  const {services, barbers, bookings } = useBarberContext()
+  const {services, bookings, loading, setLoading } = useBarberContext()
   const [slotList, setSlotList] = useState<SlotEx[]>(() => generateTimes("10:00", "20:00", 45).map((t) => ({ hour: t, availability: true })) )
 
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    date: new Date(),
-    time: "",
-  })
+  const [formData, setFormData] = useState({ name: "", phone: "", date: new Date(), time: "", })
+  const [list, setList] = useState<BookingLocal[]>([]);  
+
+  useEffect(() => {
+    setList(getLocalReservations());
+  }, []);
 
   useEffect(() => {
     getBookingsForDay()
   }, [formData.date, bookings, selectedBarber, selectedService])
+
+  async function refreshFromServer() {
+    // opcional: sincronizar estados con backend para cada reserva local
+    setLoading(true);
+    try {
+      const current = getLocalReservations();
+      const updated = await Promise.all(current.map(async (r) => {
+        try {
+          const { data } = await axios.get(`https://barber-service-backend.onrender.com/api/bookings/${r.id}`);
+          // actualizamos estado local con lo que devuelve servidor
+          const patched = {
+            status: data.status,
+            service_name: data.services?.name || r.service_name,
+            barber_name: data.barbers?.name || r.barber_name
+          };
+          updateLocalReservation(r.id, patched);
+          return { ...r, ...patched };
+        } catch (err) {
+          console.log(err);
+        }
+      }));
+      setList(updated );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }  
+
+  function handleRemove(id:string){
+    if (!confirm('Eliminar la reserva de este dispositivo?')) return;
+    removeLocalReservation(id);
+    setList(getLocalReservations());
+  }  
 
   function getBookingsForDay() {
     if (!selectedBarber) {
@@ -40,11 +75,7 @@ export const Booking = () => {
     const formattedDate = formData.date instanceof Date ? formData.date.toISOString().slice(0, 10) : formData.date
     const appointments = bookings.filter((b: Appointment) => b.date === formattedDate && b.barber_id === selectedBarber?.id)
 
-    const baseSlots = blockReservatedBooks(
-      generateTimes("10:00", "20:00", 45),
-      appointments,
-      45
-    )
+    const baseSlots = blockReservatedBooks( generateTimes("10:00", "20:00", 45), appointments, 45 )
 
     if (!selectedService) {
       const mapped = baseSlots.map((s: PendingAny) => ({ ...s, canStart: s.availability, willOccupy: s.availability ? 1 : 0, }))
@@ -57,11 +88,7 @@ export const Booking = () => {
     setSlotList(startable)
   }
 
-  // rango ocupado visualmente
-  function getOccupyRangeFromIndex(index: number) {
-    const will = slotList[index]?.willOccupy || 1
-    return [index, Math.min(slotList.length - 1, index + will - 1)]
-  }
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -79,18 +106,7 @@ export const Booking = () => {
     }
 
     const ServiceSelected = services.find((s) => s.id === selectedService?.id)
-    localStorage.setItem(
-      "bookingData",
-      JSON.stringify({
-        ...formData,
-        date: formData.date instanceof Date ? formData.date.toISOString().slice(0, 10) : formData.date,
-        serviceId: ServiceSelected?.id,
-        barberId: selectedBarber?.id,
-        deposit: ServiceSelected?.deposit,
-        serviceName: ServiceSelected?.name,
-        barberName: selectedBarber?.name,
-      })
-    )
+    localStorage.setItem( "bookingData", JSON.stringify({ ...formData, date: formData.date instanceof Date ? formData.date.toISOString().slice(0, 10) : formData.date, serviceId: ServiceSelected?.id, barberId: selectedBarber?.id, deposit: ServiceSelected?.deposit, serviceName: ServiceSelected?.name, barberName: selectedBarber?.name, }) )
     nav("/pay")
   }
 
@@ -139,141 +155,35 @@ export const Booking = () => {
                   </div>
                 </div>
 
-                {/* --- Modal de horarios --- */}
-                <Sheet open={modalOpen} onOpenChange={setModalOpen}>
-                  {selectedBarber && selectedService && formData.date && formData.time ? (
-                    <span className="text-sm sm:text-base text-foreground/70">
-                      Turno:{" "}
-                      <strong>
-                        {selectedBarber.name} - {selectedService.name} -{" "}
-                        {formData.date.toLocaleDateString("es-AR")} a las {formData.time}
-                      </strong>
-                    </span>
-                  ) : (
-                    <SheetTrigger asChild>
-                      <Button variant="outline" className="cursor-pointer w-full">
-                        Ver turnos
-                      </Button>
-                    </SheetTrigger>
-                  )}
+                <SheetBookings setSelectedBarber={setSelectedBarber} slotList={slotList} setSelectedService={setSelectedService} selectedBarber={selectedBarber} selectedService={selectedService} setFormData={setFormData} formData={formData} services={services}  />
 
-                  <SheetContent className="overflow-y-auto" >
-                    <SheetHeader>
-                      <SheetTitle>Turnos Disponibles</SheetTitle>
-                      <SheetDescription>
-                        Elige el día y horario según el peluquero y el servicio.
-                      </SheetDescription>
-                    </SheetHeader>
-
-                    <div className="space-y-4 px-4 py-2 overflow-y-auto">
-                      <Select
-                        onValueChange={(id) => {
-                          const s = services.find((x) => x.id === id)
-                          setSelectedService(s || null)
-                        }}
-                        value={selectedService?.id ?? ""}
-                      >
-                        <SelectTrigger className="w-full h-11 sm:h-12 px-3">
-                          {selectedService
-                            ? `${selectedService.name} - $${selectedService.price}`
-                            : "Seleccionar servicio"}
-                        </SelectTrigger>
-                        <SelectContent>
-                          {services.map((s) => (
-                            <SelectItem key={s.id} value={s.id}>
-                              {s.name} - ${s.price}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Select
-                        onValueChange={(id) => {
-                          const b = barbers.find((x) => x.id === id)
-                          setSelectedBarber(b || null)
-                        }}
-                        value={selectedBarber?.id ?? ""}
-                      >
-                        <SelectTrigger className="w-full h-11 sm:h-12 px-3">
-                          {selectedBarber?.name ?? "Seleccionar peluquero"}
-                        </SelectTrigger>
-                        <SelectContent>
-                          {barbers.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              {b.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Label className="px-1">Seleccionar fecha</Label>
-                      <Calendar
-                        mode="single"
-                        selected={new Date(formData.date)}
-                        onSelect={(d) => d && setFormData({ ...formData, date: d })}
-                        disabled={selectedBarber === null || selectedService === null}
-                      />
-
-                      <div>
-                        {slotList.length === 0 && (
-                          <div className="text-sm text-muted-foreground">
-                            No hay horarios disponibles
-                          </div>
-                        )}
-                        {slotList.length > 0 && (
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-1">
-                            {slotList.map((slot, idx) => {
-                              const selectedIdx = slotList.findIndex(
-                                (s) => s.hour === formData.time
-                              )
-                              const [start, end] = getOccupyRangeFromIndex(selectedIdx)
-                              const isInSelectedRange =
-                                selectedIdx !== -1 && idx >= start && idx <= end
-                              return (
-                                <button
-                                  key={slot.hour}
-                                  type="button"
-                                  disabled={!slot.canStart}
-                                  onClick={() =>
-                                    setFormData({ ...formData, time: slot.hour })
-                                  }
-                                  className={`m-1 px-3 py-2 rounded-full text-sm sm:text-base
-                                    ${
-                                      !slot.availability
-                                        ? "bg-muted text-muted-foreground cursor-not-allowed"
-                                        : ""
-                                    }
-                                    ${
-                                      slot.canStart
-                                        ? formData.time === slot.hour
-                                          ? "bg-primary text-primary-foreground"
-                                          : "bg-primary/10 text-primary hover:bg-primary/20"
-                                        : "opacity-50 cursor-not-allowed"
-                                    }
-                                    ${isInSelectedRange ? "ring-2 ring-primary/30 scale-105" : ""}`}
-                                >
-                                  {slot.hour}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
+                <div className="max-w-4xl mx-auto space-y-4 p-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Mis Reservas</h2>
+                    <div>
+                      <button onClick={refreshFromServer} className="px-3 py-1 bg-blue-600 text-white rounded">{loading ? 'Sincronizando...' : 'Sincronizar'}</button>
                     </div>
+                  </div>
 
-                    <SheetFooter>
-                        <Button type="submit" className="cursor-pointer " disabled={ !formData.time || !formData.date || !selectedBarber || !selectedService }>
-                          Guardar Datos
-                        </Button>
-                      <SheetClose asChild>
-                        <Button type="button" variant="outline" className="cursor-pointer " onClick={() => {setModalOpen(false); setSelectedBarber(null); setSelectedService(null)}}>
-                          Cerrar
-                        </Button>
-                      </SheetClose>
-                    </SheetFooter>
-                  </SheetContent>
-                </Sheet>
-
+                  {list.length === 0 ? (
+                    <div className="text-gray-600">No hay reservas guardadas en este dispositivo.</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {list.map(r => (
+                        <div key={r.id} className="p-3 border rounded flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{r.service_name} — {r.barber_name ?? ''}</div>
+                            <div className="text-sm text-muted-foreground">{r.date} {r.time}</div>
+                            <div className="text-sm">Estado: <strong>{r.status}</strong></div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button onClick={()=>handleRemove(r.id)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/80 font-bold text-base sm:text-lg py-3 lg:py-4 shadow-md shadow-primary/20 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"

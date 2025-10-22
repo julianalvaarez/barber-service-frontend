@@ -14,7 +14,7 @@ export function BarberContextProvider({ children }: { children: ReactNode }) {
   async function loadBookings() {
     setLoading(true);
     try {
-      const { data } = await axios.get('http://localhost:4000/api/admin/bookings');
+      const { data } = await axios.get('https://barber-service-backend.onrender.com/api/admin/bookings');
       setBookings(data || []);
     } catch (err) {
       console.error(err);
@@ -26,7 +26,7 @@ export function BarberContextProvider({ children }: { children: ReactNode }) {
   async function loadBarbers() {
     setLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:4000/api/services/barbers");
+      const { data } = await axios.get("https://barber-service-backend.onrender.com/api/services/barbers");
       setBarbers(data || []);
     } catch (err) {
       console.error(err);
@@ -38,7 +38,7 @@ export function BarberContextProvider({ children }: { children: ReactNode }) {
   async function loadServices() {
     setLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:4000/api/services");
+      const { data } = await axios.get("https://barber-service-backend.onrender.com/api/services");
       setServices(data || []);
     } catch (err) {
       console.error(err);

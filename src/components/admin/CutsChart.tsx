@@ -22,7 +22,7 @@ export const CutsChart = () => {
   const load = async (p: "week" | "month") => {
     try {
       setLoading(true);
-      const { data } = await axios.get( `http://localhost:4000/api/admin/stats/barber-cuts?period=${p}` );
+      const { data } = await axios.get( `https://barber-service-backend.onrender.com/api/admin/stats/barber-cuts?period=${p}` );
       setStats(data || []);
     } catch (err) {
       console.error(err);

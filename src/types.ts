@@ -71,3 +71,17 @@ export interface Slot {
   availability: boolean;
   bookInfo?: Appointment | null;
 }
+
+export type BookingLocal = {
+  id: string;           // id del booking (uuid)
+  service_id: string;
+  service_name?: string;
+  date: string;         // YYYY-MM-DD
+  time: string;         // HH:MM
+  status: string;       // 'paid'|'pending'|'cancelled'
+  barber_id?: string;
+  barber_name?: string;
+  created_at?: string;
+  stored_at: string;    // timestamp local cuando se guardó
+  // cualquier otro campo que quieras mostrar en Mis Reservas
+}

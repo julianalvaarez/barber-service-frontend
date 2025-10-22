@@ -13,7 +13,7 @@ export function PayPage() {
   const createPreference = async () => {
     setLoading(true)
     try {
-        const {data}: ResApi = await axios.post('http://localhost:4000/api/bookings', {
+        const {data}: ResApi = await axios.post('https://barber-service-backend.onrender.com/api/bookings', {
         service_id: serviceId,
         date,
         time,

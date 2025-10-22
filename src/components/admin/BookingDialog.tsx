@@ -18,7 +18,7 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
 
   async function createManual(){
     try {
-      await axios.post("http://localhost:4000/api/admin/bookings-admin", {
+      await axios.post("https://barber-service-backend.onrender.com/api/admin/bookings-admin", {
         client: user.name, 
         client_phone: user.phone,
         service_id: serviceId,
@@ -33,14 +33,14 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
 
   async function cancelBooking(){
     try {
-      await axios.delete(`http://localhost:4000/api/admin/bookings/${booking.id}`);
+      await axios.delete(`https://barber-service-backend.onrender.com/api/admin/bookings/${booking.id}`);
       onClose();
     } catch (err){ alert("Error cancelando turno"); console.error(err); }
   }
 
   async function updateBooking() {
     try {
-        await axios.put(`http://localhost:4000/api/admin/bookings/${booking.id}`, {
+        await axios.put(`https://barber-service-backend.onrender.com/api/admin/bookings/${booking.id}`, {
           client: user.name, 
           client_phone: user.phone,
           service_id: serviceId,

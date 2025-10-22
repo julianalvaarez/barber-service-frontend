@@ -112,7 +112,7 @@ export function Agenda() {
                           <Button size="sm" variant="destructive" onClick={async ()=>{
                             const ok = confirm("¿Desea cancelar la cita?");
                             if (!ok) return;
-                            await axios.delete(`http://localhost:4000/api/admin/bookings/${slot.bookInfo?.id}`);
+                            await axios.delete(`https://barber-service-backend.onrender.com/api/admin/bookings/${slot.bookInfo?.id}`);
                             await loadBookings();
                           }} className="bg-red-700 dark:bg-red-700 hover:bg-red-900 cursor-pointer">Cancelar</Button>
                         </>
