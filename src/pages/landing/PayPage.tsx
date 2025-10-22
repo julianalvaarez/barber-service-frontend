@@ -28,7 +28,7 @@ export function PayPage() {
   }
 
   useEffect(() => {
-    initMercadoPago('APP_USR-82304fa9-b779-465e-9778-05d8207a2fa7');
+    initMercadoPago('APP_USR-6f9fced3-3be3-46dd-8869-70f49a49a745');
   }, [])
   
 
