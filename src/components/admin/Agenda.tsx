@@ -64,30 +64,34 @@ export function Agenda() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  data-empty={!date}
-                  className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
-                >
-                  <CalendarIcon />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
-                </PopoverContent>
-              </Popover>
-              <Select onValueChange={(v)=>{setSelectedBarber(v)}} value={selectedBarber}>
-                  <SelectTrigger className="min-w-[180px]">
-                  {barbers.find(b => b.id === selectedBarber)?.name ?? "Todos los peluqueros"}
-                  </SelectTrigger>
-                  <SelectContent>
-                  {barbers.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                  </SelectContent>
-              </Select>
+            <div className="flex flex-col md:flex-row justify-center md:items-center gap-2">
+              <div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      data-empty={!date}
+                      className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                    >
+                      <CalendarIcon />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} />
+                  </PopoverContent>
+                </Popover>                
+              </div>
+              <div>
+                <Select onValueChange={(v)=>{setSelectedBarber(v)}} value={selectedBarber}>
+                    <SelectTrigger className="w-full md:min-w-[180px]">
+                    {barbers.find(b => b.id === selectedBarber)?.name ?? "Todos los peluqueros"}
+                    </SelectTrigger>
+                    <SelectContent>
+                    {barbers.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Button onClick={loadBookings} variant="secondary">Refrescar</Button>
