@@ -3,9 +3,10 @@ import axios from "axios";
 import type { Appointment } from "../../types";
 import { useBarberContext } from "@/context/BarberContextProvider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Input, Button, Select, SelectTrigger, SelectContent, SelectItem } from "../../components/ui";
+import { errorNotify, successNotify } from "@/lib/toasts";
 
 export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Appointment>, onClose: ()=>void, onSave: ()=>void }) {
-  const {services, barbers} = useBarberContext()
+  const {services, barbers, loading, setLoading} = useBarberContext()
   const isNew = !booking.id;
   const [user, setUser] = useState({ name: booking?.client || "", phone: booking?.client_phone || ""});
   const [serviceId, setServiceId] = useState<string>(booking.service_id || "");
@@ -17,6 +18,7 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
   }, []);
 
   async function createManual(){
+    setLoading(true);
     try {
       await axios.post("https://barber-service-backend.onrender.com/api/admin/bookings-admin", {
         client: user.name, 
@@ -28,17 +30,29 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
         status: "paid",
       });
       onSave();
-    } catch (err){ alert("Error creando turno"); console.error(err); }
+      successNotify("Turno creado");
+    } catch (err){
+      errorNotify("Error creando turno"); console.error(err); 
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function cancelBooking(){
+    setLoading(true);
     try {
       await axios.delete(`https://barber-service-backend.onrender.com/api/admin/bookings/${booking.id}`);
       onClose();
-    } catch (err){ alert("Error cancelando turno"); console.error(err); }
+      successNotify("Turno cancelado");
+    } catch (err){ 
+      errorNotify("Error cancelando turno"); console.error(err); 
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function updateBooking() {
+    setLoading(true);
     try {
         await axios.put(`https://barber-service-backend.onrender.com/api/admin/bookings/${booking.id}`, {
           client: user.name, 
@@ -50,10 +64,16 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
           status: "paid",
         })
         onSave();
-    } catch (error) { console.error(error); alert("Error actualizando el turno"); }
+        successNotify("Turno actualizado");
+    } catch (error) { 
+      console.error(error); errorNotify("Error actualizando el turno"); 
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
+    <>
     <Dialog open onOpenChange={(open: boolean)=>{ if(!open) onClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
@@ -94,15 +114,16 @@ export function BookingDialog({ booking, onClose, onSave }: { booking:Partial<Ap
 
         <DialogFooter className="flex sm:items-center justify-end gap-4">
           {isNew ? (
-            <Button onClick={createManual} className="cursor-pointer">Crear</Button>
+            <Button onClick={createManual} className="cursor-pointer disabled:opacity-50" disabled={loading}  >{loading ? "Cargando..." : "Crear Turno"}</Button>
           ) : (
             <>
-            <Button variant="destructive" onClick={cancelBooking} className="cursor-pointer">Cancelar Turno</Button>
-            <Button variant="secondary" onClick={updateBooking} className="cursor-pointer">Actualizar Turno</Button>
+            <Button variant="destructive" onClick={cancelBooking} className="cursor-pointer disabled:opacity-50" disabled={loading}>{loading ? "Cargando..." : "Cancelar Turno"}</Button>
+            <Button variant="secondary" onClick={updateBooking} className="cursor-pointer disabled:opacity-50" disabled={loading}>{loading ? "Cargando..." : "Actualizar Turno"}</Button>
             </>
           )}
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog> 
+    </>
   );
 }

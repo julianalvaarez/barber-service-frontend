@@ -12,6 +12,7 @@ import { useBarberContext } from "@/context/BarberContextProvider"
 import { SheetBookings } from "./SheetBookings"
 import { getLocalReservations, removeLocalReservation, updateLocalReservation } from "@/utils/localReservations"
 import axios from "axios"
+import { errorNotify } from "@/lib/toasts"
 
 export const Booking = () => {
   const nav = useNavigate()
@@ -102,7 +103,7 @@ export const Booking = () => {
     }
     const idx = slotList.findIndex((s) => s.hour === formData.time)
     if (idx === -1 || !slotList[idx].canStart) {
-      alert("El horario seleccionado no tiene espacio suficiente para este servicio.")
+      errorNotify("El horario seleccionado no tiene espacio suficiente para este servicio.")
       return
     }
 

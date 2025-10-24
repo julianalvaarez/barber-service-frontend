@@ -38,9 +38,12 @@ export const HeaderAdmin = () => {
             </Link>
           <div ><ModeToggle /></div>
           </div>
-          <button className="md:hidden text-primary" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex md:hidden items-center gap-4">
+            <div ><ModeToggle /></div>          
+            <button className=" text-primary" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>  
+          </div>
         </div>
 
         {isMenuOpen && (

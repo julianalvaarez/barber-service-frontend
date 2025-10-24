@@ -13,6 +13,7 @@ import { Calendar as CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { useBarberContext } from "@/context/BarberContextProvider";
+import { errorNotify, successNotify } from "@/lib/toasts";
 
 export function Agenda() {
   const {bookings, loading, loadBookings, barbers, loadBarbers} = useBarberContext();
@@ -47,6 +48,18 @@ export function Agenda() {
       setSlotList(blocked || []);
   }
 
+  const cancelBooking = async (slot:  Slot)=>{
+    const ok = confirm("¿Desea cancelar la cita?");
+    if (!ok) return;
+    try {
+      await axios.delete(`https://barber-service-backend.onrender.com/api/admin/bookings/${slot.bookInfo?.id}`);
+      await loadBookings();
+      successNotify("Turno cancelado");
+    } catch (error) {
+      console.log(error);
+      errorNotify("Error cancelando turno");
+    }
+  }
 
   return (
     <>
@@ -113,12 +126,7 @@ export function Agenda() {
                       {!slot.availability ? (
                         <>
                           <Button size="sm" onClick={()=>setOpenBooking({...slot.bookInfo})} className="bg-white text-gray-800 hover:bg-gray-100 cursor-pointer border">Ver</Button>
-                          <Button size="sm" variant="destructive" onClick={async ()=>{
-                            const ok = confirm("¿Desea cancelar la cita?");
-                            if (!ok) return;
-                            await axios.delete(`https://barber-service-backend.onrender.com/api/admin/bookings/${slot.bookInfo?.id}`);
-                            await loadBookings();
-                          }} className="bg-red-700 dark:bg-red-700 hover:bg-red-900 cursor-pointer">Cancelar</Button>
+                          <Button size="sm" variant="destructive" onClick={()=>cancelBooking(slot)} className="bg-red-700 dark:bg-red-700 hover:bg-red-900 cursor-pointer">Cancelar</Button>
                         </>
                       ) : (
                         <Button size="sm" onClick={()=>setOpenBooking({ date: date.toLocaleDateString("en-CA"), time: slot.hour, barber_id: selectedBarber })} className="bg-green-200 dark:border dark:hover:border-green-300 text-gray-800 hover:bg-gray-100 cursor-pointer border">Agregar</Button>
@@ -135,6 +143,8 @@ export function Agenda() {
         </Card>
       
       }
+
+
     </>
   )
 }
