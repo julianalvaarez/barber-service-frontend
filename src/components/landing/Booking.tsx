@@ -17,7 +17,9 @@ import { errorNotify } from "@/lib/toasts"
 export const Booking = () => {
   const nav = useNavigate()
   const {services, bookings, loading, setLoading } = useBarberContext()
-  const [slotList, setSlotList] = useState<SlotEx[]>(() => generateTimes("10:00", "20:00", 45).map((t) => ({ hour: t, availability: true })) )
+  const cutClasic = services.filter((s) => s.name === 'Corte clásico')
+  const intervals = cutClasic[0]?.duration || 50
+  const [slotList, setSlotList] = useState<SlotEx[]>(() => generateTimes("9:00", "20:00", intervals).map((t) => ({ hour: t, availability: true })) )
 
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
@@ -70,14 +72,14 @@ export const Booking = () => {
 
   function getBookingsForDay() {
     if (!selectedBarber) {
-      setSlotList(generateTimes("10:00", "20:00", 45).map((t) => ({ hour: t, availability: true })))
+      setSlotList(generateTimes("9:00", "20:00", intervals).map((t) => ({ hour: t, availability: true })))
       return
     }
 
     const formattedDate = formData.date instanceof Date ? formData.date.toISOString().slice(0, 10) : formData.date
     const appointments = bookings.filter((b: Appointment) => b.date === formattedDate && b.barber_id === selectedBarber?.id)
 
-    const baseSlots = blockReservatedBooks( generateTimes("10:00", "20:00", 45), appointments, 45 )
+    const baseSlots = blockReservatedBooks( generateTimes("9:00", "20:00", intervals), appointments, intervals )
 
     if (!selectedService) {
       const mapped = baseSlots.map((s: PendingAny) => ({ ...s, canStart: s.availability, willOccupy: s.availability ? 1 : 0, }))
@@ -86,7 +88,7 @@ export const Booking = () => {
     }
 
     const duration = selectedService.duration || 45
-    const startable = computeStartableSlots(baseSlots as SlotEx[], duration, 45)
+    const startable = computeStartableSlots(baseSlots as SlotEx[], duration, intervals)
     setSlotList(startable)
   }
 

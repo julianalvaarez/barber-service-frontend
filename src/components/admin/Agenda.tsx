@@ -16,10 +16,12 @@ import { useBarberContext } from "@/context/BarberContextProvider";
 import { errorNotify, successNotify } from "@/lib/toasts";
 
 export function Agenda() {
-  const {bookings, loading, loadBookings, barbers, loadBarbers} = useBarberContext();
+  const {bookings, loading, loadBookings, barbers, loadBarbers, services} = useBarberContext();
   const [date, setDate] = useState<Date>(new Date());
   const [selectedBarber, setSelectedBarber] = useState<string>("");
-  const [slotList, setSlotList] = useState<Slot[]  >(() => generateTimes("10:00", "20:00", 45).map(t => ({ hour: t, availability: true })));
+  const cutClasic = services.filter((s) => s.name === 'Corte clásico');
+  const intervals = cutClasic[0]?.duration || 50;
+  const [slotList, setSlotList] = useState<Slot[]  >(() => generateTimes("9:00", "20:00", intervals).map(t => ({ hour: t, availability: true })));
   const [openBooking, setOpenBooking] = useState<Partial<Appointment> | null >(null);
 
 
@@ -43,8 +45,9 @@ export function Agenda() {
       if (!selectedBarber || bookings.length === 0) return;      
       const formattedDate = date.toLocaleDateString("en-CA");
       const appointments = bookings.filter((b: Appointment) => b.date === formattedDate && b.barber_id === selectedBarber);
-      const intervals = 45;
-      const blocked = blockReservatedBooks( generateTimes("10:00", "20:00", intervals), appointments, intervals );
+      const cutClasic = services.filter((s) => s.name === 'Corte clásico');
+      const intervals = cutClasic[0]?.duration || 45;
+      const blocked = blockReservatedBooks( generateTimes("9:00", "20:00", intervals), appointments, intervals );
       setSlotList(blocked || []);
   }
 

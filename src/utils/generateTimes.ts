@@ -1,6 +1,6 @@
 // Genera horarios cada media hora dentro de un rango (por defecto de 10:00 a 20:00)
 export function generateTimes(
-  start = '10:00',
+  start = '9:00',
   end = '20:00',
   intervalMinutes: number
 ) {
