@@ -68,8 +68,9 @@ export function Agenda() {
     <>
       {
       loading ?
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col gap-2 items-center justify-center h-screen">
           <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-gray-900 dark:border-white"></div>
+          <p className="text-foreground">Esto puede tardar un momento...</p>
         </div> 
         :
         <Card className="space-y-4 dark:bg-[#0a0a0a] my-[40px]">
