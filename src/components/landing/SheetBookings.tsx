@@ -117,12 +117,9 @@ export const SheetBookings = ({setSelectedBarber, slotList, selectedBarber, serv
                               {slotList.length > 0 && (
                                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-1">
                                   {slotList.map((slot, idx) => {
-                                    const selectedIdx = slotList.findIndex(
-                                      (s) => s.hour === formData.time
-                                    )
+                                    const selectedIdx = slotList.findIndex( (s) => s.hour === formData.time )
                                     const [start, end] = getOccupyRangeFromIndex(selectedIdx)
-                                    const isInSelectedRange =
-                                      selectedIdx !== -1 && idx >= start && idx <= end
+                                    const isInSelectedRange = selectedIdx !== -1 && idx >= start && idx <= end
                                     return (
                                       <button
                                         key={slot.hour}

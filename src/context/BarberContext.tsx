@@ -1,5 +1,5 @@
 import type { Appointment, Barber, Service } from "@/types";
-import { createContext } from "react";
+import { createContext, type Dispatch, type SetStateAction } from "react";
 
 type ContextType = {
   loading: boolean;
@@ -13,6 +13,12 @@ type ContextType = {
   services: Service[]
   setServices: (services: Service[]) => void;
   loadServices: () => Promise<void>;
+  setLoadingGeneral: (loading: boolean) => void;
+  loadingGeneral: boolean;
+  slotList: import("@/types").Slot[];
+  generateAgendaForDay: (date: Date, barberId: string) => void;
+  selectedBarber: string;
+  setSelectedBarber: Dispatch<SetStateAction<string>>
 };
 
 
